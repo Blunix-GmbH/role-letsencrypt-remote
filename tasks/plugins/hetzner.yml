@@ -1,0 +1,45 @@
+- name: install certbot_pip_package in virtualenv for letsencrypt_domain_names[0]
+  pip:
+    name:
+      - certbot-dns-hetzner
+      - setuptools
+    state: latest
+    virtualenv: "/var/opt/certbot/certbot.virtualenv"
+  become: True
+  become_user: certbot
+
+
+- name: create hetzner credentials file
+  copy:
+    dest: "/var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/credentials.ini"
+    owner: certbot
+    group: certbot
+    mode: 0400
+    content: |
+      dns_hetzner_api_token = {{ letsencrypt_dns_hetzner_api_token }}
+
+
+- name: run the command to obtain the certificates
+  shell: |
+      /var/opt/certbot/certbot.virtualenv/bin/certbot certonly \
+        --dns-luadns-credentials /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/luadns.ini \
+        --cert-name {{ letsencrypt_domain_names[0] }} \
+        --config-dir /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/config \
+        --logs-dir /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/logs \
+        --work-dir /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/ \
+        --authenticator dns-hetzner \
+        --dns-hetzner-credentials /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/credentials.ini \
+        --dns-hetzner-propagation-seconds 120 \
+        --domain {{ letsencrypt_domain_names | join(' --domain ') }} \
+        --register-unsafely-without-email \
+        --agree-tos \
+        --expand \
+        --non-interactive 2>&1
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  register: letsencrypt_obtain_out
+
+- name: show obtain command output
+  debug:
+    msg: "{{ letsencrypt_obtain_out.stdout }}"

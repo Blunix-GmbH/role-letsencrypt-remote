@@ -1,0 +1,48 @@
+- name: run only when letsencrypt_domain_names are defined
+  meta: end_host
+  when: letsencrypt_domain_names == []
+
+
+- name: inform about bad compatability with check mode
+  debug:
+    msg: |
+      ## PLEASE NOTE ##
+      This role does not support check mode very well!
+      Tasks which gather information on existing certificates will not be executed.
+      False information will be displayed!
+      ## ## ## ## ## ##
+  when: ansible_check_mode == True
+
+
+- name: include tasks to gather information about the existing certificate
+  include_tasks: gather-information.yml
+
+
+- name: include tasks to determine generation
+  include_tasks: determine-generation.yml
+  # hack to run on every host, but ask questions one after another
+  with_items: "{{ ansible_play_hosts }}"
+  loop_control:
+    loop_var: letsencrypt_play_host
+  when: letsencrypt_play_host == inventory_hostname
+
+
+- name: run only when letsencrypt_generate is True
+  meta: end_host
+  when: letsencrypt_generate == False
+
+
+- name: include tasks to setup the certbot environment
+  include_tasks: setup.yml
+
+
+- name: "include plugin {{ letsencrypt_plugin }} specific tasks"
+  include_tasks: "plugins/{{ letsencrypt_plugin }}.yml"
+
+
+- name: include tasks to process the generated certificate
+  include_tasks: process-certificate.yml
+
+
+- name: include tasks to run post hooks
+  include_tasks: post-hooks.yml

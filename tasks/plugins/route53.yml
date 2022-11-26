@@ -1,0 +1,35 @@
+- name: install certbot_pip_package in virtualenv
+  pip:
+    name: "certbot_dns_route53"
+    state: latest
+    virtualenv: "/var/opt/certbot/certbot.virtualenv"
+  become: True
+  become_user: certbot
+
+
+- name: run the command to obtain the certificates
+  shell: |
+      /var/opt/certbot/certbot.virtualenv/bin/certbot certonly \
+        --cert-name {{ letsencrypt_domain_names[0] }} \
+        --config-dir /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/config \
+        --logs-dir /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/logs \
+        --work-dir /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/ \
+        --dns-route53 \
+        --dns-route53-propagation-seconds 120 \
+        --domain {{ letsencrypt_domain_names | join(' --domain ') }} \
+        --register-unsafely-without-email \
+        --agree-tos \
+        --expand \
+        --non-interactive 2>&1
+  environment:
+    AWS_ACCESS_KEY_ID: "{{ letsencrypt_aws_access_key }}"
+    AWS_SECRET_ACCESS_KEY: "{{ letsencrypt_aws_secret_key }}"
+  args:
+    executable: /bin/bash
+  become: True
+  become_user: certbot
+  register: letsencrypt_obtain_out
+
+- name: run the command to obtain the certificates output
+  debug:
+    msg: "{{ letsencrypt_obtain_out.stdout }}"

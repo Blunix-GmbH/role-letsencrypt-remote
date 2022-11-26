@@ -1,0 +1,35 @@
+- name: "copy certificate files to /etc/letsencrypt/live/{{ letsencrypt_domain_names[0] }}/"
+  copy:
+    src: "/var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/config/live/{{ letsencrypt_domain_names[0] }}/{{ letsencrypt_copy_cert_file }}"
+    dest: "/etc/letsencrypt/live/{{ letsencrypt_domain_names[0] }}/{{ letsencrypt_copy_cert_file }}"
+    remote_src: True
+    owner: root
+    group: root
+    mode: 0400
+  with_items:
+    - cert.pem
+    - fullchain.pem
+    - chain.pem
+    - privkey.pem
+  loop_control:
+    loop_var: letsencrypt_copy_cert_file
+
+
+
+- name: overwrite and remove files in certbot generation directory /var/opt/certbot/
+  shell: |
+    exec 2>&1
+    set -x
+    certbot_directories="/var/opt/certbot/certbot.virtualenv /var/opt/certbot/domains /var/opt/certbot/.cache /var/opt/certbot/.ansible /var/opt/certbot/.local"
+    /usr/bin/find $certbot_directories -type f -exec /usr/bin/shred --iterations 3 {{ "{}" }} \;
+    rm -rf $certbot_directories
+  args:
+    executable: /bin/bash
+  register: letsencrypt_certbot_cleanup
+
+- name: overwrite and remove files in certbot generation directory /var/opt/certbot/ output
+  debug:
+    msg: |
+      return code: {{ letsencrypt_certbot_cleanup.rc }}
+      {{ letsencrypt_certbot_cleanup.stdout }}
+  failed_when: letsencrypt_certbot_cleanup.failed == True

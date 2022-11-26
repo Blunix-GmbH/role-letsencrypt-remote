@@ -1,0 +1,42 @@
+# shell commands to run after uploading the new certificate
+letsencrypt_post_hook: False
+
+# Which plugin to use from plays/plugins/
+letsencrypt_plugin: False
+
+# The name of the virtualenv for letsencrypt
+letsencrypt_virtualenv: blunix-role-letsencrypt-local
+
+# Force renew certificate
+letsencrypt_force_renew: False
+
+# dhparam size
+letsencrypt_dhparam_size: 4096
+
+# By default no domain names are defined
+letsencrypt_domain_names: []
+
+
+
+
+
+# DO NOT MODIFY THE LINES BELOW
+# Default variables for the roles gather-information.yml tasks
+
+# If the cert needs to be renewed
+letsencrypt_renew: False
+
+# Comparing the domain names of the existing certificate with the projected ones
+letsencrypt_certificate_names_match: False
+
+# Time until the certificate expires
+letsencrypt_expiry_time_days: 'Certificate file not found'
+
+# Domain names defined in the certificate
+letsencrypt_certificate_domain_names: 'Certificate file not found'
+
+# Days before renewing certificates
+letsencrypt_renew_days_max: 30
+
+# Generate a certificate
+letsencrypt_generate: False

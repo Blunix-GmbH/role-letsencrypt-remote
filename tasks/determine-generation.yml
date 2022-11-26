@@ -1,0 +1,29 @@
+- name: print certificate information
+  debug:
+    msg: |
+      Certificate:      {{ letsencrypt_domain_names[0] }}
+      Expires in days:  {{ letsencrypt_expiry_time_days }}
+      Current domains:  {{ letsencrypt_certificate_domain_names }}
+      Defined domains:  {{ letsencrypt_domain_names | sort | join(' ') }}
+      Domains match:    {{ letsencrypt_certificate_names_match }}
+      Update required:  {{ letsencrypt_renew }}
+      {% if letsencrypt_force_renew == True or letsencrypt_renew == True or letsencrypt_stat.stat.exists == False %}
+
+      "y" to generate
+      Any other character to skip
+      "CRTL + c - a" to abort
+      {% endif %}
+
+- pause:
+    prompt: ""
+  register: letsencrypt_renew_question_prompt
+  when: >
+    letsencrypt_force_renew == False and
+    letsencrypt_renew == True
+
+- name: enable generation of certificate
+  set_fact:
+    letsencrypt_generate: True
+  when: >
+    letsencrypt_renew_question_prompt.get('user_input', False) == "y" or
+    letsencrypt_force_renew == True

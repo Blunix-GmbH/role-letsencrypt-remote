@@ -1,0 +1,71 @@
+- name: install required packages
+  apt:
+    name:
+      - virtualenv
+      - python-setuptools
+    state: present
+
+- name: remove packages that have to be absent
+  apt:
+    name: certbot
+    state: absent
+
+
+
+- name: add certbot group
+  group:
+    name: certbot
+    system: True
+
+- name: add certbot user
+  user:
+    name: certbot
+    system: True
+    shell: /bin/bash
+    home: /var/opt/certbot
+    groups:
+      - certbot
+    append: False
+
+
+
+- name: create certbot virtualenv
+  shell: "/usr/bin/virtualenv --python python3 /var/opt/certbot/certbot.virtualenv"
+  become: True
+  become_user: certbot
+  args:
+    executable: /bin/bash
+    creates: "/var/opt/certbot/certbot.virtualenv"
+
+- name: create working directories
+  file:
+    state: directory
+    owner: certbot
+    group: certbot
+    mode: 0700
+    path: "/var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/{{ letsencrypt_certbot_working_directory }}/"
+  with_items:
+    - logs
+    - config
+  loop_control:
+    loop_var: letsencrypt_certbot_working_directory
+
+- name: "create directory /etc/letsencrypt/live/{{ letsencrypt_domain_names[0] }}"
+  file:
+    state: directory
+    path: "/etc/letsencrypt/live/{{ letsencrypt_domain_names[0] }}"
+    owner: root
+    group: root
+    mode: 0700
+
+
+
+- name: "generate /etc/letsencrypt/live/{{ letsencrypt_domain_names[0] }}/dh{{ letsencrypt_dhparam_size }}.pem (background task)"
+  openssl_dhparam:
+    path: "/etc/letsencrypt/live/{{ letsencrypt_domain_names[0] }}/dh{{ letsencrypt_dhparam_size }}.pem"
+    size: "{{ letsencrypt_dhparam_size }}"
+    owner: root
+    group: root
+    mode: 0400
+  async: 3600
+  poll: 0
