@@ -27,11 +27,6 @@
   when: letsencrypt_play_host == inventory_hostname
 
 
-- name: run only when letsencrypt_generate is True
-  meta: end_host
-  when: letsencrypt_generate == False
-
-
 - name: include tasks to setup the certbot environment
   include_tasks: setup.yml
 
