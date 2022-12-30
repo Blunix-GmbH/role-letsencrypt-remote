@@ -11,10 +11,7 @@
 - name: execute post hook shell script output
   debug:
     msg: |
-      return code: {{ letsencrypt_post_hook_out_result.rc }}
-      {{ letsencrypt_post_hook_out_result.stdout }}
-  failed_when: letsencrypt_post_hook_out_result.failed == True
-  with_items: "{{ letsencrypt_post_hook_out.results }}"
-  loop_control:
-    loop_var: letsencrypt_post_hook_out_result
+      return code: {{ letsencrypt_post_hook_out.rc }}
+      {{ letsencrypt_post_hook_out.stdout }}
+  failed_when: letsencrypt_post_hook_out.failed == True
   when: letsencrypt_post_hook != False
