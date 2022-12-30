@@ -12,6 +12,8 @@
       "y" to generate
       Any other character to skip
       "CRTL + c - a" to abort
+      {% else %}
+      AUTOMATIC RENEWAL ENABLED
       {% endif %}
 
 - pause:
