@@ -37,7 +37,8 @@
         --non-interactive 2>&1
   args:
     executable: /bin/bash
-  delegate_to: localhost
+  become: True
+  become_user: certbot
   register: letsencrypt_obtain_out
 
 - name: show obtain command output
