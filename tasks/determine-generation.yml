@@ -7,13 +7,15 @@
       Defined domains:  {{ letsencrypt_domain_names | sort | join(' ') }}
       Domains match:    {{ letsencrypt_certificate_names_match }}
       Update required:  {{ letsencrypt_renew }}
-      {% if letsencrypt_force_renew == True or letsencrypt_renew == True or letsencrypt_stat.stat.exists == False %}
+      {% letsencrypt_force_renew == False and letsencrypt_renew == True %}
 
       "y" to generate
       Any other character to skip
       "CRTL + c - a" to abort
+      {% letsencrypt_force_renew == True and letsencrypt_renew == True %}
+      AUTOMATIC RENEWAL ENABLED (letsencrypt_force_renew is True)
       {% else %}
-      AUTOMATIC RENEWAL ENABLED
+      NO ACTION REQUIRED
       {% endif %}
 
 - pause:
@@ -23,9 +25,19 @@
     letsencrypt_force_renew == False and
     letsencrypt_renew == True
 
+
+- name: inform about ending the play if letsencrypt_renew is not True
+  debug:
+    msg: "Ending the play as letsencrypt_renew is not True"
+  when: letsencrypt_renew != True
+- name: end the play if letsencrypt_renew is not True
+  meta: end_play
+  when: letsencrypt_renew != True
+
+
 - name: enable generation of certificate
   set_fact:
     letsencrypt_generate: True
   when: >
-    letsencrypt_renew_question_prompt.get('user_input', False) == "y" or
-    letsencrypt_force_renew == True
+    letsencrypt_renew == True and letsencrypt_force_renew == True or
+    letsencrypt_renew == True and letsencrypt_renew_question_prompt.get('user_input', False) == "y"

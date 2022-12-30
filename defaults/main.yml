@@ -40,3 +40,6 @@ letsencrypt_renew_days_max: 30
 
 # Generate a certificate
 letsencrypt_generate: False
+
+# Wether the certificate files are already present or not
+letsencrypt_exists: False
