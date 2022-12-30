@@ -22,7 +22,6 @@
 - name: run the command to obtain the certificates
   shell: |
       /var/opt/certbot/certbot.virtualenv/bin/certbot certonly \
-        --dns-luadns-credentials /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/luadns.ini \
         --cert-name {{ letsencrypt_domain_names[0] }} \
         --config-dir /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/config \
         --logs-dir /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/logs \
