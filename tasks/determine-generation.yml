@@ -1,20 +1,22 @@
 - name: print certificate information
   debug:
     msg: |
-      Certificate:      {{ letsencrypt_domain_names[0] }}
-      Expires in days:  {{ letsencrypt_expiry_time_days }}
-      Current domains:  {{ letsencrypt_certificate_domain_names }}
-      Defined domains:  {{ letsencrypt_domain_names | sort | join(' ') }}
-      Domains match:    {{ letsencrypt_certificate_names_match }}
-      Update required:  {{ letsencrypt_renew }}
-      {% letsencrypt_force_renew == False and letsencrypt_renew == True %}
+      Certificate:       {{ letsencrypt_domain_names[0] }}
+      Expires in days:   {{ letsencrypt_expiry_time_days }}
+      Current domains:   {{ letsencrypt_certificate_domain_names }}
+      Inventory domains: {{ letsencrypt_domain_names | sort | join(' ') }}
+      Domains match:     {{ letsencrypt_certificate_names_match }}
+      Update required:   {{ letsencrypt_renew }}
+      {% if letsencrypt_force_renew == False and letsencrypt_renew == True %}
 
       "y" to generate
       Any other character to skip
       "CRTL + c - a" to abort
-      {% letsencrypt_force_renew == True and letsencrypt_renew == True %}
+      {% elif letsencrypt_force_renew == True and letsencrypt_renew == True %}
+
       AUTOMATIC RENEWAL ENABLED (letsencrypt_force_renew is True)
       {% else %}
+
       NO ACTION REQUIRED
       {% endif %}
 
@@ -26,12 +28,12 @@
     letsencrypt_renew == True
 
 
-- name: inform about ending the play if letsencrypt_renew is not True
+- name: inform about ending the host if letsencrypt_renew is not True
   debug:
-    msg: "Ending the play as letsencrypt_renew is not True"
+    msg: "Ending the host as letsencrypt_renew is not True"
   when: letsencrypt_renew != True
-- name: end the play if letsencrypt_renew is not True
-  meta: end_play
+- name: end the host if letsencrypt_renew is not True
+  meta: end_host
   when: letsencrypt_renew != True
 
 

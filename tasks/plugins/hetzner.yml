@@ -21,6 +21,11 @@
 
 - name: run the command to obtain the certificates
   shell: |
+      # Not all servers at once
+      sleep_seconds=$(( RANDOM % 60 ))
+      echo "Sleeping for $sleep_seconds seconds to randomize requests to letsencrypt"
+      /bin/sleep $sleep_seconds
+      # Request certificate
       /var/opt/certbot/certbot.virtualenv/bin/certbot certonly \
         --cert-name {{ letsencrypt_domain_names[0] }} \
         --config-dir /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/config \
@@ -38,6 +43,9 @@
     executable: /bin/bash
   become: True
   become_user: certbot
+  # TODO try this
+  throttle: 1
+  order: sorted
   register: letsencrypt_obtain_out
 
 - name: show obtain command output
