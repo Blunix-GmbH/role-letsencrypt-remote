@@ -43,9 +43,6 @@
     executable: /bin/bash
   become: True
   become_user: certbot
-  # TODO try this
-  throttle: 1
-  order: sorted
   register: letsencrypt_obtain_out
 
 - name: show obtain command output
