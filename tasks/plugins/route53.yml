@@ -9,7 +9,7 @@
 
 - name: run the command to obtain the certificates
   shell: |
-      /var/opt/certbot/certbot.virtualenv/bin/certbot certonly \
+      count=1; while [[ $count -le {{ letsencrypt_retry_count }} ]]; do /var/opt/certbot/certbot.virtualenv/bin/certbot certonly \
         --cert-name {{ letsencrypt_domain_names[0] }} \
         --config-dir /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/config \
         --logs-dir /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/logs \
@@ -20,7 +20,9 @@
         --register-unsafely-without-email \
         --agree-tos \
         --expand \
-        --non-interactive 2>&1
+        --non-interactive 2>&1 && exit 0
+      let count++
+      done; exit 1
   environment:
     AWS_ACCESS_KEY_ID: "{{ letsencrypt_aws_access_key }}"
     AWS_SECRET_ACCESS_KEY: "{{ letsencrypt_aws_secret_key }}"

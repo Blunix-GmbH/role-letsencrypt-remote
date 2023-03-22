@@ -16,7 +16,9 @@ letsencrypt_dhparam_size: 4096
 # By default no domain names are defined
 letsencrypt_domain_names: []
 
-
+# How many times to retry to get a certificate
+# Remember to quotes if you want one "1" (ansible will turn it to True otherwise)
+letsencrypt_retry_count: "3"
 
 
 

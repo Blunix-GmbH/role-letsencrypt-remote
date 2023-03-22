@@ -26,7 +26,7 @@
       echo "Sleeping for $sleep_seconds seconds to randomize requests to letsencrypt"
       /bin/sleep $sleep_seconds
       # Request certificate
-      /var/opt/certbot/certbot.virtualenv/bin/certbot certonly \
+      count=1; while [[ $count -le {{ letsencrypt_retry_count }} ]]; do /var/opt/certbot/certbot.virtualenv/bin/certbot certonly \
         --cert-name {{ letsencrypt_domain_names[0] }} \
         --config-dir /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/config \
         --logs-dir /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/logs \
@@ -38,7 +38,9 @@
         --register-unsafely-without-email \
         --agree-tos \
         --expand \
-        --non-interactive 2>&1
+        --non-interactive 2>&1 && exit 0
+      let count++
+      done; exit 1
   args:
     executable: /bin/bash
   become: True
