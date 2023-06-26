@@ -1,23 +1,22 @@
-- name: check if a certificate is present
+- name: "check presence"
   stat:
     path: "/etc/letsencrypt/live/{{ letsencrypt_domain_names[0] }}/fullchain.pem"
   register: letsencrypt_stat
 
-- name: set letsencrypt_exists to True if a certificate is present
+- name: "set letsencrypt_exists True"
   set_fact:
     letsencrypt_exists: True
   when: letsencrypt_stat.stat.exists == True
 
 
 
-- name: get certificate expiry date
+- name: "get expiry date of existing certificate"
   shell: |
     date --date="$(openssl x509 -in /etc/letsencrypt/live/{{ letsencrypt_domain_names[0] }}/fullchain.pem -noout -enddate | cut -d= -f 2)" +%s
   register: letsencrypt_expiry_date_check
   when: letsencrypt_exists == True
 
-
-- name: get certificate domain names
+- name: "get domain names of existing certificate"
   shell: |
     openssl x509 -noout -text -nameopt multiline -in /etc/letsencrypt/live/{{ letsencrypt_domain_names[0] }}/fullchain.pem \
       | grep '    DNS:' \
@@ -25,33 +24,28 @@
   register: letsencrypt_certificate_domain_names
   when: letsencrypt_exists == True
 
-
-- name: set certificate facts
+- name: "set facts"
   set_fact:
     letsencrypt_certificate_expiry_date_seconds: "{{ letsencrypt_expiry_date_check.stdout }}"
     letsencrypt_current_date_seconds: "{{ ansible_date_time['epoch'] }}"
     letsencrypt_certificate_domain_names: "{{ letsencrypt_certificate_domain_names.stdout }}"
   when: letsencrypt_exists == True
 
-
-- name: calculate time until certificate expiration
+- name: "calculate time until expiry"
   set_fact:
     letsencrypt_expiry_time_days: "{{ ( (letsencrypt_certificate_expiry_date_seconds | int - letsencrypt_current_date_seconds | int ) / 86400 ) | round }}"
   when: letsencrypt_exists == True
 
 
-- name: set fact for certificate domain name comparison to default value
-  set_fact:
-    letsencrypt_certificate_names_match: False
 
-
-- name: set fact for certificate domain name comparison
+- name: "set letsencrypt_certificate_names_match True"
   set_fact:
     letsencrypt_certificate_names_match: True
   when: letsencrypt_certificate_domain_names == letsencrypt_domain_names | sort | join(' ')
 
-
-- name: set renewal required fact
+- name: "set letsencrypt_time_to_renew True"
   set_fact:
-    letsencrypt_renew: True
-  when: letsencrypt_exists == False or letsencrypt_expiry_time_days | int <= letsencrypt_renew_days_max | int or letsencrypt_certificate_names_match == False
+    letsencrypt_time_to_renew: True
+  when: >
+    letsencrypt_exists == True and
+    letsencrypt_expiry_time_days | int <= letsencrypt_renew_days_max | int

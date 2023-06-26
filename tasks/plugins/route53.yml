@@ -1,4 +1,4 @@
-- name: install certbot_pip_package in virtualenv
+- name: "install pip packages"
   pip:
     name: "certbot_dns_route53"
     state: latest
@@ -7,7 +7,7 @@
   become_user: certbot
 
 
-- name: run the command to obtain the certificates
+- name: "run certbot executable"
   shell: |
       count=1; while [[ $count -le {{ letsencrypt_retry_count }} ]]; do /var/opt/certbot/certbot.virtualenv/bin/certbot certonly \
         --cert-name {{ letsencrypt_domain_names[0] }} \
@@ -15,7 +15,6 @@
         --logs-dir /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/logs \
         --work-dir /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/ \
         --dns-route53 \
-        --dns-route53-propagation-seconds 120 \
         --domain {{ letsencrypt_domain_names | join(' --domain ') }} \
         --register-unsafely-without-email \
         --agree-tos \
@@ -32,6 +31,6 @@
   become_user: certbot
   register: letsencrypt_obtain_out
 
-- name: run the command to obtain the certificates output
+- name: "run certbot executable output"
   debug:
     msg: "{{ letsencrypt_obtain_out.stdout }}"

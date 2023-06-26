@@ -1,4 +1,4 @@
-- name: "copy certificate files to /etc/letsencrypt/live/{{ letsencrypt_domain_names[0] }}/"
+- name: "{{ letsencrypt_domain_names[0] }} | copy files to /etc/letsencrypt/live/{{ letsencrypt_domain_names[0] }}/"
   copy:
     src: "/var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/config/live/{{ letsencrypt_domain_names[0] }}/{{ letsencrypt_copy_cert_file }}"
     dest: "/etc/letsencrypt/live/{{ letsencrypt_domain_names[0] }}/{{ letsencrypt_copy_cert_file }}"
@@ -16,7 +16,7 @@
 
 
 
-- name: overwrite and remove files in certbot generation directory /var/opt/certbot/
+- name: "{{ letsencrypt_domain_names[0] }} | shred and remove /var/opt/certbot/"
   shell: |
     exec 2>&1
     set -x
@@ -27,7 +27,7 @@
     executable: /bin/bash
   register: letsencrypt_certbot_cleanup
 
-- name: overwrite and remove files in certbot generation directory /var/opt/certbot/ output
+- name: "{{ letsencrypt_domain_names[0] }} | shred and remove /var/opt/certbot/ output"
   debug:
     msg: |
       return code: {{ letsencrypt_certbot_cleanup.rc }}

@@ -21,8 +21,8 @@ This role was written for Debian 11 servers.
     # shell task to execute on the server after renewing the certificate
     letsencrypt_post_hook: service apache2 restart
 
-    # Unless this is set to True, the role will always ask before modifying a certificate
-    letsencrypt_force_renew: True (default: False)
+    # Maximum certificate age in days before renewal is triggered
+    letsencrypt_renew_days_max: 80
 ```
 
 # License

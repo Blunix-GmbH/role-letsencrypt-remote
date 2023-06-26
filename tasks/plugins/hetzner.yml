@@ -1,4 +1,4 @@
-- name: install certbot_pip_package in virtualenv for letsencrypt_domain_names[0]
+- name: "install pip packages"
   pip:
     name:
       - certbot-dns-hetzner
@@ -9,7 +9,7 @@
   become_user: certbot
 
 
-- name: create hetzner credentials file
+- name: "create hetzner credentials.ini"
   copy:
     dest: "/var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/credentials.ini"
     owner: certbot
@@ -19,7 +19,7 @@
       dns_hetzner_api_token = {{ letsencrypt_dns_hetzner_api_token }}
 
 
-- name: run the command to obtain the certificates
+- name: "run certbot executable"
   shell: |
       # Not all servers at once
       sleep_seconds=$(( RANDOM % 60 ))
@@ -47,6 +47,6 @@
   become_user: certbot
   register: letsencrypt_obtain_out
 
-- name: show obtain command output
+- name: "run certbot executable output"
   debug:
     msg: "{{ letsencrypt_obtain_out.stdout }}"

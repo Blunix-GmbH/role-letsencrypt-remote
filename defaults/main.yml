@@ -5,10 +5,7 @@ letsencrypt_post_hook: False
 letsencrypt_plugin: False
 
 # The name of the virtualenv for letsencrypt
-letsencrypt_virtualenv: blunix-role-letsencrypt-local
-
-# Force renew certificate
-letsencrypt_force_renew: False
+letsencrypt_virtualenv: blunix-role-letsencrypt-remote
 
 # dhparam size
 letsencrypt_dhparam_size: 4096
@@ -45,3 +42,6 @@ letsencrypt_generate: False
 
 # Wether the certificate files are already present or not
 letsencrypt_exists: False
+
+# Wether it is time to renew the certificate, based on letsencrypt_expiry_time_days =< letsencrypt_renew_days_max
+letsencrypt_time_to_renew: False

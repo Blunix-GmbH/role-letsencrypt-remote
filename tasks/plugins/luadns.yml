@@ -1,4 +1,4 @@
-- name: install certbot_pip_package in virtualenv
+- name: "install pip packages"
   pip:
     name:
       - certbot_dns_luadns
@@ -9,7 +9,7 @@
   become_user: certbot
 
 
-- name: create luadns credentials file
+- name: "create luadns.ini"
   copy:
     dest: "/var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/luadns.ini"
     owner: certbot
@@ -20,7 +20,7 @@
       dns_luadns_token = {{ letsencrypt_dns_luadns_token }}
 
 
-- name: run the command to obtain the certificates
+- name: "run certbot executable"
   shell: |
       count=1; while [[ $count -le {{ letsencrypt_retry_count }} ]]; do /var/opt/certbot/certbot.virtualenv/bin/certbot certonly \
         --dns-luadns-credentials /var/opt/certbot/domains/{{ letsencrypt_domain_names[0] }}/luadns.ini \
@@ -44,6 +44,6 @@
   register: letsencrypt_obtain_out
 
 
-- name: run the command to obtain the certificates output
+- name: "run certbot executable output"
   debug:
     msg: "{{ letsencrypt_obtain_out.stdout }}"

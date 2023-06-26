@@ -1,11 +1,11 @@
-- name: install required packages
+- name: install apt packages
   apt:
     name:
       - virtualenv
       - python-setuptools
     state: present
 
-- name: remove packages that have to be absent
+- name: remove apt packages that have to be absent
   apt:
     name: certbot
     state: absent
@@ -50,7 +50,7 @@
   loop_control:
     loop_var: letsencrypt_certbot_working_directory
 
-- name: "create directory /etc/letsencrypt/live/{{ letsencrypt_domain_names[0] }}"
+- name: 'create directory /etc/letsencrypt/live/{letsencrypt_domain_names[0]}'
   file:
     state: directory
     path: "/etc/letsencrypt/live/{{ letsencrypt_domain_names[0] }}"
@@ -60,7 +60,7 @@
 
 
 
-- name: "generate /etc/letsencrypt/live/{{ letsencrypt_domain_names[0] }}/dh{{ letsencrypt_dhparam_size }}.pem (background task)"
+- name: 'generate /etc/letsencrypt/live/{letsencrypt_domain_names[0]}/dh{letsencrypt_dhparam_size}.pem (background task)'
   openssl_dhparam:
     path: "/etc/letsencrypt/live/{{ letsencrypt_domain_names[0] }}/dh{{ letsencrypt_dhparam_size }}.pem"
     size: "{{ letsencrypt_dhparam_size }}"

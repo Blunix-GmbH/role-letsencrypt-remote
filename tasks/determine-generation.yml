@@ -1,45 +1,75 @@
-- name: print certificate information
+- name: "{{ letsencrypt_domain_names[0] }} | status"
   debug:
     msg: |
-      Certificate:       {{ letsencrypt_domain_names[0] }}
-      Expires in days:   {{ letsencrypt_expiry_time_days }}
-      Current domains:   {{ letsencrypt_certificate_domain_names }}
-      Inventory domains: {{ letsencrypt_domain_names | sort | join(' ') }}
-      Domains match:     {{ letsencrypt_certificate_names_match }}
-      Update required:   {{ letsencrypt_renew }}
-      {% if letsencrypt_force_renew == False and letsencrypt_renew == True %}
 
+      {% if letsencrypt_exists == False %}
+      Certificate:       {{ letsencrypt_domain_names[0] }}
+      Exists:            {{ letsencrypt_exists }}
+
+      DECISION REQUIRED
+
+      {% elif letsencrypt_exists == True and letsencrypt_certificate_names_match == True and letsencrypt_time_to_renew == False %}
+      Certificate:       {{ letsencrypt_domain_names[0] }}
+      Exists:            {{ letsencrypt_exists }}
+      Time to renew:     {{ letsencrypt_time_to_renew }}
+      Expires in days:   {{ letsencrypt_expiry_time_days }}
+      Domains match:     {{ letsencrypt_certificate_names_match }}
+
+      NOTHING TO DO
+
+      {% elif letsencrypt_exists == True and letsencrypt_certificate_names_match == True and letsencrypt_time_to_renew == True %}
+      Certificate:       {{ letsencrypt_domain_names[0] }}
+      Exists:            {{ letsencrypt_exists }}
+      Time to renew:     {{ letsencrypt_time_to_renew }}
+      Expires in days:   {{ letsencrypt_expiry_time_days }}
+      Domains match:     {{ letsencrypt_certificate_names_match }}
+
+      AUTOMATIC RENEWAL ENABLED
+
+      {% elif letsencrypt_exists == True and letsencrypt_certificate_names_match == False %}
+      Certificate:       {{ letsencrypt_domain_names[0] }}
+      Exists:            {{ letsencrypt_exists }}
+      Time to renew:     {{ letsencrypt_time_to_renew }}
+      Expires in days:   {{ letsencrypt_expiry_time_days }}
+      Domains match:     {{ letsencrypt_certificate_names_match }}
+
+      Old domains:       {{ letsencrypt_certificate_domain_names }}
+      New domains:       {{ letsencrypt_domain_names | sort | join(' ') }}
+
+      DECISION REQUIRED
+
+      {% endif %}
+      {% if letsencrypt_exists == False or letsencrypt_certificate_names_match == False %}
       "y" to generate
       Any other character to skip
       "CRTL + c - a" to abort
-      {% elif letsencrypt_force_renew == True and letsencrypt_renew == True %}
-
-      AUTOMATIC RENEWAL ENABLED (letsencrypt_force_renew is True)
-      {% else %}
-
-      NO ACTION REQUIRED
       {% endif %}
 
 - pause:
     prompt: ""
   register: letsencrypt_renew_question_prompt
-  when: >
-    letsencrypt_force_renew == False and
-    letsencrypt_renew == True
+  when: letsencrypt_exists == False or letsencrypt_certificate_names_match == False
 
 
-- name: inform about ending the host if letsencrypt_renew is not True
+
+- name: "{{ letsencrypt_domain_names[0] }} | END HOST - NOT TAKING ACTION"
   debug:
-    msg: "Ending the host as letsencrypt_renew is not True"
-  when: letsencrypt_renew != True
-- name: end the host if letsencrypt_renew is not True
-  meta: end_host
-  when: letsencrypt_renew != True
+    msg: "END HOST - NOT TAKING ACTION"
+  when: >
+    letsencrypt_exists == False and letsencrypt_renew_question_prompt.get('user_input', False) != "y" or
+    letsencrypt_certificate_names_match == False and letsencrypt_renew_question_prompt.get('user_input', False) != "y" or
+    letsencrypt_exists == True and letsencrypt_certificate_names_match == True and letsencrypt_time_to_renew == False
+- meta: end_host
+  when: >
+    letsencrypt_exists == False and letsencrypt_renew_question_prompt.get('user_input', False) != "y" or
+    letsencrypt_certificate_names_match == False and letsencrypt_renew_question_prompt.get('user_input', False) != "y" or
+    letsencrypt_exists == True and letsencrypt_certificate_names_match == True and letsencrypt_time_to_renew == False
 
 
-- name: enable generation of certificate
+
+- name: "{{ letsencrypt_domain_names[0] }} | set letsencrypt_generate True"
   set_fact:
     letsencrypt_generate: True
   when: >
-    letsencrypt_renew == True and letsencrypt_force_renew == True or
-    letsencrypt_renew == True and letsencrypt_renew_question_prompt.get('user_input', False) == "y"
+    letsencrypt_exists == True and letsencrypt_certificate_names_match == True and letsencrypt_time_to_renew == True or
+    letsencrypt_renew_question_prompt.get('user_input', False) == "y"
