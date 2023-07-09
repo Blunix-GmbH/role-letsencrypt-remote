@@ -43,9 +43,22 @@
     letsencrypt_certificate_names_match: True
   when: letsencrypt_certificate_domain_names == letsencrypt_domain_names | sort | join(' ')
 
+- name: "set letsencrypt_certificate_names_match False"
+  set_fact:
+    letsencrypt_certificate_names_match: False
+  when: letsencrypt_certificate_domain_names != letsencrypt_domain_names | sort | join(' ')
+
+
 - name: "set letsencrypt_time_to_renew True"
   set_fact:
     letsencrypt_time_to_renew: True
   when: >
     letsencrypt_exists == True and
     letsencrypt_expiry_time_days | int <= letsencrypt_renew_days_max | int
+
+- name: "set letsencrypt_time_to_renew False"
+  set_fact:
+    letsencrypt_time_to_renew: False
+  when: >
+    letsencrypt_exists != True and
+    letsencrypt_expiry_time_days | int > letsencrypt_renew_days_max | int
