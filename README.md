@@ -1,42 +1,31 @@
-# Role Letsencrypt Remote
-This role requests certificates via DNS TXT record challanges setup by using DNS providers APIs. It runs on the remote host.
+# blunix.role-letsencrypt-remote
+This Ansible role installs and configures letsencrypt.
 
-This role was written for Debian 11 servers.
+This role is part of the Blunix hosting stack. Documentation is available at <a href="https://www.blunix.com/manual" target="_blank">https://www.blunix.com/manual</a>.
 
 
-# Example play
-```yaml
-- hosts: all
-  roles:
-    - blunix_role-letsencrypt-remote_11.0.0
-  vars:
+# Mirror to github
+This repository is mirrored from <a href="https://git.blunix.com/ansible-roles/" target="_blank">https://git.blunix.com/ansible-roles/</a> to github.com/Blunix-GmbH/.
 
-    # List of domains
-    letsencrypt_domain_names:
-      - "my.domain.com"
 
-    # Which "plugin" under plays/plugins/ to use
-    letsencrypt_plugin: luadns
+# Author Information
+Blunix GmbH
 
-    # shell task to execute on the server after renewing the certificate
-    letsencrypt_post_hook: service apache2 restart
+`root@linux:~# Consulting | Hosting | Training`
 
-    # Maximum certificate age in days before renewal is triggered
-    letsencrypt_renew_days_max: 80
+Blunix GmbH provides 24/7/365 Linux emergency consulting and support, Service Level Agreements for Debian Linux managed hosting using Ansible Configuration Management as well as Linux trainings and workshops.
+
+```
+Blunix GmbH
+Glogauer Straße 21
+10999 Berlin
+Germany
+
+Website: https://www.blunix.com
+Contact: https://www.blunix.com#contact
 ```
 
 # License
 Apache-2.0
 
-# Author Information
-Service and support for orchestrated hosting environments, continuous integration/deployment/delivery and various Linux
-and open-source technology stacks are available from:
-
-```
-Blunix GmbH - Professional Linux Service
-Glogauer Straße 21
-10999 Berlin - Germany
-
-Web: www.blunix.org
-Email: mailto:service@blunix.org
-```
+Please refer to the LICENSE file in the root of this repository.
